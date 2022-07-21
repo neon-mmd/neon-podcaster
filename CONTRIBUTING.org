@@ -1,0 +1,22 @@
+* Things to consider before contributing.
+
+** Knowledge required
+
+- python3 basics (including *CSV file handling*)
+- Linux command line basics
+- launchers like fzf, dmenu, etc
+- feedparser module is known --> [[https://www.tutorialspoint.com/python_text_processing/python_reading_rss_feed.htm]]
+- argparse module is known --> [[https://docs.python.org/3/howto/argparse.html]]
+- os, sys module is known
+- subprocess module is known --> [[https://docs.python.org/3/library/subprocess.html]]
+- re module is known --> [[https://docs.python.org/3/library/re.html]]
+  
+** guidlines
+
+- please be patient
+- treat everyone with respect --- ("give respect and take respect")
+- document your code properly
+- provide a brief description of what changes you made in the pull request
+- provide an apropriate header to pull requests
+
+  *NOTE:* The test directory is where the contributions should go. In simple terms, it is the working directory for this project.

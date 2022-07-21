@@ -1,0 +1,154 @@
+* neon-podcaster
+
+A command line podcast client to listen to any podcast episode using rss. Written completely in python.
+
+* Quick Start
+
+*neon-podcaster* is a command line program/app to listen to any podcast channel episode.
+
+** Display Options
+
+  -h, --help  show this help message and exit
+  -p          run the podcast client
+  -b          build the podcast channel feed file
+  -l L        provide the launcher to use (default: 'dmenu -l 20')
+  -v V        provide the default volume to launch with (default: '30')
+  -d          delete a podcast channel from the feed file.
+
+** Requirements
+
+ Before you start a few things are required in order for the program/app to work.
+
+ - mpv should either be configured with ytdl hook or should be configured with the ytdlautoformat extension.
+
+   check out this [[https://youtu.be/4wWI1iv4KEE][tutorial]] on how to add extensions in mpv.
+
+ - python 3.8 or above should be installed from your distributions package manager.
+
+**  Examples
+
+*** build the podcast channel feed file by adding the podcast channels
+
+#+begin_src shell
+  neon-podcaster -b
+#+end_src
+
+[[file:images/build.png]]
+
+*** delete a podcast channel from the feed file
+
+#+begin_src shell
+  neon-podcaster -d
+#+end_src
+
+Select the channel name you want to delete and press <Enter> and it will delete it for you.
+
+[[file:images/delete.png]]
+
+*** run the podcast client
+
+#+begin_src shell
+  neon-podcaster -p
+#+end_src
+
+Select the channel from which you want to listen to.
+
+[[file:images/select.png]]
+
+After selecting just wait for a few seconds as it takes time to retrieve the rss feed, Then just select the episode you want to play.
+
+[[file:images/select the episode.png]]
+
+Then your selected episode should play as shown below.
+
+[[file:images/episode playing.png]]
+
+*** choose a different launcher to use
+
+#+begin_src shell
+  neon-podcaster -p -l "rofi -dmenu"
+#+end_src
+
+[[file:images/different launcher.png]]
+
+*** change the default volume with which the podcast should play
+
+#+begin_src shell
+  neon-podcaster -p -v 50
+#+end_src
+
+*** change the volume after it has begun playing the episode
+
+ Since the app/program uses mpv as the backend to play podcast episodes it uses the same keyboard shortcuts as mpv uses.
+
+ such as:
+
+ 0,9 -- to increase and decrease volume,
+ p -- to pause,
+ m -- to mute,
+ etc.
+
+* Backup
+
+If you want to backup your podcast feed list file. The file can be found at */home/$USER/.config/neonPodcaster/feeds.csv*. 
+ 
+* Installation
+
+** Arch Linux
+
+The package is available in the [[https://aur.archlinux.org/packages/stdm-git][aur]] and in neon-os (arch distro) repo
+
+#+begin_src shell
+  paru -S neon-podcaster-git
+#+end_src
+
+Or
+
+add the following lines in the pacman.conf.
+
+#+begin_src text
+  [neon-os-core-repo]
+  SigLevel = Required DatabaseOptional
+  Server = https://gitlab.com/NEON-MMD/$repo/-/raw/main/$arch
+#+end_src
+
+*Important:* add the key server, recieve the keys and sign the keys locally. 
+
+#+begin_src shell
+  grep -qxF "keyserver.ubuntu.com:80" /etc/pacman.d/gnupg/gpg.conf || echo "keyserver hkp://keyserver.ubuntu.com:80" | sudo tee -a /etc/pacman.d/gnupg/gpg.conf
+  grep -qxF "keyserver.ubuntu.com:443" /etc/pacman.d/gnupg/gpg.conf || echo "keyserver hkps://keyserver.ubuntu.com:443" | sudo tee -a /etc/pacman.d/gnupg/gpg.conf
+  sudo pacman-key --recv-key 51F9A14D1DEE561A
+  sudo pacman-key --lsign-key 51F9A14D1DEE561A
+#+end_src
+
+Sync the repository before installing it and also during the sync process it will complain about missing Keys. It is normal and accept the prompt to import it and you are good to go :). 
+
+#+begin_src shell
+  sudo pacman -Syyu
+#+end_src
+
+then install it using pacman
+
+#+begin_src shell
+  sudo pacman -S neon-podcaster-git
+#+end_src
+
+** Other Distros
+
+currently the package is not available on other linux distros. But with contribution and support it can be made available on other distros as well.
+
+* Contributing
+
+Contributions are welcome. It does not matter who you are you can still contribute to the project in your way :).
+
+** Not a developer but still want to contribute
+
+Here is [[https://youtu.be/FccdqCucVSI][video]] by Mr. Nick on how to contribute and credit to him as well
+
+** Developer
+
+If you are developer, have a look at the [[file:CONTRIBUTING.org][CONTRIBUTING.org]] document for more information.
+
+* License
+
+The project is available under the [[file:LICENSE][GPLv3]] license.
