@@ -83,7 +83,7 @@ def buildFeedForPodcast():
     if not os.path.exists(os.path.expanduser("~/.config/neonPodcaster")):
         os.mkdir(os.path.expanduser("~/.config/neonPodcaster"))
     numberOfFeeds = int(input("enter the number of feeds to add: "))
-    with open(feedFilePath, "w") as f:
+    with open(feedFilePath, "a") as f:
         for i in range(numberOfFeeds):
             csv_writer = csv.writer(f)
             channelName = input("Channel Name: ")
