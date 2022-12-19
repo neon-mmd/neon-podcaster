@@ -57,11 +57,11 @@ Select the channel from which you want to listen to.
 
 After selecting just wait for a few seconds as it takes time to retrieve the rss feed, Then just select the episode you want to play.
 
-[[file:images/select the episode.png]]
+[[file:images/select_the_episode.png]]
 
 Then your selected episode should play as shown below.
 
-[[file:images/episode playing.png]]
+[[file:images/episode_playing.png]]
 
 *** choose a different launcher to use
 
@@ -69,7 +69,7 @@ Then your selected episode should play as shown below.
   neon-podcaster -p -l "rofi -dmenu"
 #+end_src
 
-[[file:images/different launcher.png]]
+[[file:images/different_launcher.png]]
 
 *** change the default volume with which the podcast should play
 
@@ -96,7 +96,7 @@ If you want to backup your podcast feed list file. The file can be found at */ho
 
 ** Arch Linux
 
-The package is available in the [[https://aur.archlinux.org/packages/stdm-git][aur]] and in neon-os (arch distro) repo
+The package is available in the [[https://aur.archlinux.org/packages/neon-podcaster-git][aur]] and in neon-os (arch distro) repo
 
 #+begin_src shell
   paru -S neon-podcaster-git
