@@ -109,7 +109,7 @@ add the following lines in the pacman.conf.
 #+begin_src text
   [neon-os-core-repo]
   SigLevel = Required DatabaseOptional
-  Server = https://gitlab.com/NEON-MMD/$repo/-/raw/main/$arch
+  Server = https://gitlab.com/neon-os/$repo/-/raw/main/$arch
 #+end_src
 
 *Important:* add the key server, recieve the keys and sign the keys locally. 
