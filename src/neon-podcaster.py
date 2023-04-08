@@ -1,140 +1,128 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""A command line podcast client"""
 
 # ------------------imports--------------------
-import os
+from os.path import exists, expanduser
+from os import mkdir, remove, system
+from typing import Tuple
 from feedparser import parse
-import csv
-import subprocess
+from csv import reader, writer
+from subprocess import getoutput
 from argparse import ArgumentParser
 from re import sub
 
 # -----------------defining some variables--------------------------
-cacheFilePath = os.path.expanduser("~/.cache/temp.csv")
-feedFilePath = os.path.expanduser("~/.config/neonPodcaster/feeds.csv")
-defaultVolume = 30
-launcher = "dmenu -l 20"
+CACHE_FILE: str = expanduser("~/.cache/temp.csv")
+FEED_FILE: str = expanduser("~/.config/neonPodcaster/feeds.csv")
+DEFAULT_VOLUME: int = 30
+DEFAULT_LAUNCHER: str = "dmenu -l 20"
 
 # ------------------The working code----------------------------------
 
 
-def podcast_client():
-    # Put all the podcast channel names list in the launcher of choice and ask the user to choose one
-    optionList = ""
-    with open(feedFilePath) as f:
-        reader = csv.reader(f)
-        for row in reader:
-            optionList += row[0] + "\n"
-    optionList += "quit"
+def podcast_client() -> None:
+    """A function which handles the launching and playing of the podcast client by first giving
+    him the channel list to choose from using the config file and then using the channel name and
+    config file to retrieve that channel's rss feed url and then fetching the rss feed and wrtting
+    it into a temporary/cache file and then showing the list of episodes using the cache file
+    and then allowing the user to choose from it and then using the episode name and cache file
+    to retrieve it's url respectively and playing it in mpv"""
 
-    # Take the name of the podcast channel chosen and grab its equivalent url in the list
+    optionList: str = (
+        f"{chr(10).join(map(lambda line: line[0], reader(open(FEED_FILE))))}\nquit"
+    )
+
     link = ""
-    ans = subprocess.getoutput(
-        "echo -e '" + optionList + "'" + " | " + launcher)
-    if ans == "quit" or ans == "":
+    ans = getoutput(f"echo -e '{optionList}' | {DEFAULT_LAUNCHER}")
+    if ans in ("quit", ""):
         exit()
     else:
-        with open(feedFilePath) as f:
-            reader = csv.reader(f)
-            for row in reader:
-                if row[0] == ans:
-                    link = row[1]
-                    break
+        link: str = next(
+            filter(lambda line: line[0] == "Coldfusion", reader(open(FEED_FILE)))
+        )[1]
 
-    # Take the podcast channel rss feed and parse it and give the latest rss episode list
-    # with episode name and link
-    rssFeed = parse(link)
-    episodeList = ""
-    for i in rssFeed.entries:
-        episodeList += i.title + "~" + i.link + "\n"
+    with open(CACHE_FILE, "w") as f:
+        f.write(
+            "\n".join(
+                map(lambda entry: f"{entry.title}~{entry.link}", parse(link).entries)
+            )
+        )
 
-    # write the episode list to csv file
-    with open(cacheFilePath, "w") as f:
-        f.write(episodeList)
+    optionList: str = f"{chr(10).join(map(lambda line: line[0], reader(open(CACHE_FILE),delimiter='~')))}\nquit"
 
-    # Put all the episode name list in the launcher of choice and ask the user to choose one
-    optionList = ""
-    with open(cacheFilePath) as f:
-        reader = csv.reader(f, delimiter="~")
-        for row in reader:
-            optionList += row[0] + "\n"
-    optionList += "quit"
-
-    # Take the name of the episode chosen and grab its equivalent url in the list
-    answer = subprocess.getoutput(
-        "echo -e \"" + optionList + "\"" + " | " + launcher)
-    if answer == "quit" or answer == "":
+    answer: str = getoutput(f'echo -e "{optionList}" | {DEFAULT_LAUNCHER}')
+    if answer in ("quit", ""):
         exit()
     else:
-        with open(cacheFilePath) as f:
-            reader = csv.reader(f, delimiter="~")
-            for row in reader:
-                # print(re.sub(r"[\"]","",row[0]) == answer)
-                if sub(r"[\"]", "", row[0]) == answer:
-                    link = row[1]
-                    break
+        link: str = next(
+            filter(
+                lambda row: row[0] == sub(r"[\"]", "", row[0]),
+                reader(open(CACHE_FILE), delimiter="~"),
+            )
+        )[1]
 
-    # Open the chosen episode link in mpv without video.
-    os.system("mpv --no-video \"" + link + "\" --volume=" + str(defaultVolume))
+    system(f'mpv --no-video "{link}" --volume={DEFAULT_VOLUME}')
+
 
 # ----------------------build podcast channel feed list-------------------
 
 
-def buildFeedForPodcast():
-    if not os.path.exists(os.path.expanduser("~/.config/neonPodcaster")):
-        os.mkdir(os.path.expanduser("~/.config/neonPodcaster"))
-    numberOfFeeds = int(input("enter the number of feeds to add: "))
-    with open(feedFilePath, "a") as f:
-        for i in range(numberOfFeeds):
-            csv_writer = csv.writer(f)
-            channelName = input("Channel Name: ")
-            channelUrl = input("Url: ")
-            csv_writer.writerow([channelName, channelUrl])
+def buildFeedForPodcast() -> None:
+    """A function which handles the building of the config file and writing of the
+    config file (if it already exists) by taking the entries of {channel_name} and
+    {channel_rss_feed_url}"""
+
+    if not exists(expanduser("~/.config/neonPodcaster")):
+        mkdir(expanduser("~/.config/neonPodcaster"))
+
+    numberOfFeeds: int = int(input("enter the number of feeds to add: "))
+    csv_writer = writer(open(FEED_FILE, "a"))
+
+    for _ in range(numberOfFeeds):
+        channel_name: str = input("Channel Name: ")
+        channel_rss_feed_url: str = input("Url: ")
+        csv_writer.writerow((channel_name, channel_rss_feed_url))
+
 
 # ---------------------delete a podcast channel from feed list---------------
 
 
-def DelPodChannelFromFeedFile():
-    # Put all the podcast channel names list in the launcher of choice and ask the user to choose one
-    tempList = []
-    optionList = ""
-    with open(feedFilePath) as f:
-        reader = csv.reader(f)
-        for row in reader:
-            optionList += row[0] + "\n"
-            tempList.append(row)
-    optionList += "quit"
+def DelPodChannelFromFeedFile() -> None:
+    """A function which deletes the selected channel name from the config file"""
 
-    # Take the name of the podcast channel chosen and do not write it into the new file
-    ans = subprocess.getoutput(
-        "echo -e '" + optionList + "'" + " | " + launcher)
-    if ans == "quit" or ans == "":
+    tempList: Tuple = tuple(reader(open(expanduser(FEED_FILE))))
+    optionList: str = f"{chr(10).join(map(lambda line: line[0], tempList))}\nquit"
+
+    ans: str = getoutput(f"echo -e '{optionList}' | {DEFAULT_LAUNCHER}")
+    if ans in ("quit", ""):
         exit()
     else:
-        os.remove(feedFilePath)
-        with open(feedFilePath, "w") as f:
-            csv_writer = csv.writer(f)
-            for line in tempList:
-                if line[0] != ans:
-                    csv_writer.writerow(line)
+        remove(FEED_FILE)
+        csv_writer = writer(open(FEED_FILE, "w"))
+        csv_writer.writerows(filter(lambda line: line[0] != ans, tempList))
 
 
 # -------------------------parse the arguments------------------------
 parser = ArgumentParser(description="A command line Podcast Client App")
 parser.add_argument("-p", help="run the podcast client", action="store_true")
 parser.add_argument(
-    "-b", help="build the podcast channel feed file", action="store_true")
+    "-b", help="build the podcast channel feed file", action="store_true"
+)
+parser.add_argument("-l", help="provide the launcher to use (default: 'dmenu -l 20')")
 parser.add_argument(
-    "-l", help="provide the launcher to use (default: 'dmenu -l 20')")
+    "-v", help="provide the default volume to launch with (default: '30')", type=int
+)
 parser.add_argument(
-    "-v", help="provide the default volume to launch with (default: '30')", type=int)
-parser.add_argument(
-    "-d", help="delete a podcast channel from the feed file", action="store_true")
+    "-d", help="delete a podcast channel from the feed file", action="store_true"
+)
 args = parser.parse_args()
 
 if args.l:
-    launcher = args.l
+    DEFAULT_LAUNCHER: str = args.l
 if args.v:
-    defaultVolume = args.v
+    DEFAULT_VOLUME: int = args.v
 if args.b:
     buildFeedForPodcast()
 if args.p:
